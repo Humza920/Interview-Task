@@ -1,78 +1,64 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "../../features/authslice";
-import { Navigate } from "react-router-dom";
-
-export default function LoginPage() {
-  const { user, loading } = useSelector((state) => state.auth);
-  console.log(user);
-
-  if (loading) return <p>Checking authentication...</p>;
-  if (user) return<Navigate to="/dashboard" replace />;
-  const [emailAddress, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const dispatch = useDispatch();
-  const handleSubmit = (e) => {
+import { loginApi } from "../../service/authapi";
+import { Link, useNavigate } from "react-router-dom";
+const Login = () => {
+  const [obj, setObj] = useState({
+    emailAddress: "",
+    password: "",
+  });
+  
+function handleChange(name , value) {
+ setObj({
+  ...obj ,
+  [name] : value
+ })
+}  
+  const navigate = useNavigate();
+  async function handleSubmit(e) {
     e.preventDefault();
-    dispatch(login({ emailAddress, password }));
-    setEmail("");
-    setPassword("");
-  };
+    const isLogged = await loginApi(obj);
+    if (isLogged) {
+      console.log("run");
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+    }
+  }
 
   return (
-    <>
-      <h2 className="text-3xl lg:text-4xl font-bold text-white mb-2 lg:mb-3">
-        Welcome Back
-      </h2>
-      <p className="text-gray-300 mb-8 lg:mb-10 text-base lg:text-lg">
-        Log in to manage your finances
-      </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-sm bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-2xl font-semibold text-center mb-6">Login</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6 lg:space-y-8">
-        <div>
-          <label className="block text-sm lg:text-base font-medium text-gray-200 mb-3">
-            Email
-          </label>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
-            value={emailAddress}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-6 py-5 bg-white/20 hover:bg-white/25 border border-white/30 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-indigo-900 transition-colors duration-200 text-lg lg:text-xl"
-            placeholder="you@company.com"
+            placeholder="Enter your email"
+            value={obj.email}
+            onChange={(e)=>{handleChange("emailAddress" , e.target.value)}}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-        </div>
 
-        <div>
-          <label className="block text-sm lg:text-base font-medium text-gray-200 mb-3">
-            Password
-          </label>
           <input
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            className="w-full px-6 py-5 bg-white/20 hover:bg-white/25 border border-white/30 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-indigo-900 transition-colors duration-200 text-lg lg:text-xl"
+            placeholder="Enter your password"
+            value={obj.password}
+            onChange={(e)=>{handleChange("password" , e.target.value)}}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-        </div>
 
-        <button
-          type="submit"
-          className="w-full py-5 bg-gradient-to-r from-pink-600 to-purple-700 text-white font-bold rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-[1.02] active:scale-100 transition-transform duration-300 text-lg lg:text-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-purple-700"
-        >
-          Login Securely
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+          >
+            Login
+          </button>
+        </form>
 
-      <p className="mt-8 lg:mt-10 text-center text-gray-300 text-base lg:text-lg">
-        New here?{" "}
-        <Link
-          to="/signup"
-          className="text-pink-300 font-semibold hover:underline"
-        >
-          Create Account
-        </Link>
-      </p>
-    </>
+        <Link to={"/signup"}>Create an account</Link>
+      </div>
+    </div>
   );
-}
+};
+
+export default Login;
